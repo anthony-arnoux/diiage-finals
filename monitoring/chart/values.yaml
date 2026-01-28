@@ -63,10 +63,9 @@ prometheus:
       web.enable-remote-write-receiver: ""
     
     service:
-      type: NodePort
+      type: ClusterIP
       servicePort: 80
     
-      nodePort: 30090
     persistentVolume:
       enabled: false
     
@@ -158,10 +157,9 @@ grafana:
   adminPassword: admin
   
   service:
-    type: NodePort
+    type: ClusterIP
     port: 80
   
-    nodePort: 30300
   persistence:
     enabled: true
     type: pvc
