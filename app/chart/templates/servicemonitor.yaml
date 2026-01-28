@@ -10,6 +10,7 @@ spec:
     matchLabels:
       # Doit être IDENTIQUE aux labels de ton Service dans app/chart/templates/service.yaml
       app.kubernetes.io/name: shop-backend
+      app.kubernetes.io/instance: backend-app
   endpoints:
   - port: http
     path: /metrics
