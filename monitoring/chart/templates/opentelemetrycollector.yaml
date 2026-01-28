@@ -9,6 +9,10 @@ metadata:
     app.kubernetes.io/component: opentelemetry-collector
 spec:
   image: {{ .Values.opentelemetryCollector.image | default "otel/opentelemetry-collector-contrib:latest" | quote }}
+  # Ensure the Operator-created Service exposes the Collector's internal Prometheus metrics endpoint.
+  ports:
+    - name: metrics
+      port: 8888
   resources:
 {{- toYaml .Values.opentelemetryCollector.resources | nindent 4 }}
   config:
@@ -40,6 +44,13 @@ spec:
         verbosity: basic
 
     service:
+      telemetry:
+        metrics:
+          # Grafana dashboard expects Prometheus-scraped otelcol_* metrics.
+          # Bind on all interfaces so Prometheus can reach it via the Service.
+          address: 0.0.0.0:8888
+          # Ensure receiver/exporter metrics (otelcol_receiver_*, otelcol_exporter_*) are emitted.
+          level: detailed
       pipelines:
         traces:
           receivers: [otlp]
