@@ -1,0 +1,56 @@
+{{- if .Values.opentelemetryCollector.enabled }}
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: {{ .Values.opentelemetryCollector.name | default "monitoring-collector" | quote }}
+  namespace: {{ .Values.global.namespace | default "monitoring" | quote }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name | quote }}
+    app.kubernetes.io/component: opentelemetry-collector
+spec:
+  image: {{ .Values.opentelemetryCollector.image | default "otel/opentelemetry-collector-contrib:latest" | quote }}
+  resources:
+{{- toYaml .Values.opentelemetryCollector.resources | nindent 4 }}
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+    processors:
+      batch: {}
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 75
+        spike_limit_percentage: 15
+
+    exporters:
+      otlp/tempo:
+        endpoint: {{ .Values.opentelemetryCollector.exporters.tempoEndpoint | default "tempo.monitoring.svc.cluster.local:4317" | quote }}
+        tls:
+          insecure: true
+
+      prometheusremotewrite:
+        endpoint: {{ .Values.opentelemetryCollector.exporters.prometheusEndpoint | default "http://monitoring-prometheus-server.monitoring.svc.cluster.local:80/api/v1/write" | quote }}
+
+      logging:
+        verbosity: basic
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlp/tempo, logging]
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [prometheusremotewrite, logging]
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [logging]
+{{- end }}

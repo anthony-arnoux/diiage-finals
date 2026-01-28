@@ -1,0 +1,19 @@
+{{- if .Values.otel.enabled }}
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: {{ include "diiage-finals-app.name" . }}-instrumentation
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "diiage-finals-app.labels" . | nindent 4 }}
+spec:
+  exporter:
+    # Auto-instrumentation default is often OTLP/HTTP; keep a dedicated endpoint for that.
+    endpoint: {{ .Values.otel.httpEndpoint | quote }}
+  propagators:
+    - tracecontext
+    - baggage
+  sampler:
+    type: parentbased_traceidratio
+    argument: "1"
+{{- end }}

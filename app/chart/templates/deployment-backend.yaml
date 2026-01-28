@@ -37,6 +37,18 @@ spec:
                   fieldPath: metadata.name
             - name: APP_NAME
               value: {{ .Values.backend.config.appName | quote }}
+            {{- if .Values.otel.enabled }}
+            - name: OTEL_SERVICE_NAME
+              value: {{ .Values.backend.config.appName | quote }}
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .Values.otel.endpoint | quote }}
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: {{ .Values.otel.protocol | quote }}
+            - name: OTEL_TRACES_EXPORTER
+              value: "otlp"
+            - name: OTEL_METRICS_EXPORTER
+              value: "otlp"
+            {{- end }}
             - name: LOG_LEVEL
               value: {{ .Values.backend.config.logLevel | quote }}
             - name: CONFIGMAP_NAME

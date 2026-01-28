@@ -4,7 +4,8 @@ global:
 
 cert-manager:
   enabled: true
-  installCRDs: true
+  crds:
+    enabled: true
 
 opentelemetry-operator:
   enabled: true
@@ -16,6 +17,11 @@ opentelemetry-operator:
       go:
         repository: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go
         tag: v0.23.0
+
+  # Use cert-manager (installed by this chart) for the admission webhook certificates.
+  admissionWebhooks:
+    certManager:
+      enabled: true
 
 # OpenTelemetry Collector CRD (managed by operator)
 opentelemetryCollector:
@@ -30,8 +36,10 @@ opentelemetryCollector:
       cpu: 100m
       memory: 256Mi
   exporters:
-    tempoEndpoint: tempo.monitoring.svc.cluster.local:4317
-    prometheusEndpoint: http://prometheus-server.monitoring.svc.cluster.local:80/api/v1/write
+    # Service created by the Tempo subchart is <release>-tempo
+    tempoEndpoint: monitoring-tempo.monitoring.svc.cluster.local:4317
+    # Service created by the Prometheus subchart is <release>-prometheus-server
+    prometheusEndpoint: http://monitoring-prometheus-server.monitoring.svc.cluster.local:80/api/v1/write
 
 # Prometheus configuration
 prometheus:
@@ -79,7 +87,8 @@ prometheus:
       scrape_configs:
         - job_name: 'otel-collector'
           static_configs:
-            - targets: ['collector-monitoring.monitoring.svc.cluster.local:8888']
+            # Service created by the OpenTelemetry Operator is <collector_name>-collector
+            - targets: ['monitoring-collector-collector.monitoring.svc.cluster.local:8888']
         
         - job_name: 'backend'
           kubernetes_sd_configs:
@@ -204,7 +213,7 @@ grafana:
         - name: Tempo
           type: tempo
           access: proxy
-          url: http://tempo:3200
+          url: http://monitoring-tempo:3200
           isDefault: false
           editable: true
           jsonData:
@@ -217,7 +226,7 @@ grafana:
         - name: Tempo (Search)
           type: tempo
           access: proxy
-          url: http://tempo:3200
+          url: http://monitoring-tempo:3200
           isDefault: false
           editable: true
           jsonData:

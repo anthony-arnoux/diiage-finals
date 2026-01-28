@@ -29,3 +29,11 @@ backend:
       debug_mode: "false"
       api_timeout_seconds: "30"
       cache_ttl: "3600"
+
+otel:
+  enabled: true
+  # OTLP endpoint (Collector Service). Defaults to the collector deployed by monitoring/chart.
+  # Protocol is set to gRPC to avoid per-language defaults.
+  endpoint: "http://monitoring-collector-collector.monitoring.svc.cluster.local:4317"
+  httpEndpoint: "http://monitoring-collector-collector.monitoring.svc.cluster.local:4318"
+  protocol: "grpc"
