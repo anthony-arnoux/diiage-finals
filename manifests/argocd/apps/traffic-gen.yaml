@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traffic-gen
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/anthony-arnoux/diiage-finals
+    targetRevision: main
+    path: traffic-gen-app/chart
+    helm:
+      releaseName: traffic-gen
+      parameters:
+        - name: env.BACKEND_URL
+          value: http://backend-diiage-finals-app-backend:80
+        - name: env.INTERVAL
+          value: 5s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: diiage
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
