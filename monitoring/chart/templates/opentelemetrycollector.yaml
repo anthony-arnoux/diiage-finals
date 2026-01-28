@@ -36,7 +36,7 @@ spec:
       prometheusremotewrite:
         endpoint: {{ .Values.opentelemetryCollector.exporters.prometheusEndpoint | default "http://monitoring-prometheus-server.monitoring.svc.cluster.local:80/api/v1/write" | quote }}
 
-      logging:
+      debug:
         verbosity: basic
 
     service:
@@ -44,13 +44,13 @@ spec:
         traces:
           receivers: [otlp]
           processors: [memory_limiter, batch]
-          exporters: [otlp/tempo, logging]
+          exporters: [otlp/tempo, debug]
         metrics:
           receivers: [otlp]
           processors: [memory_limiter, batch]
-          exporters: [prometheusremotewrite, logging]
+          exporters: [prometheusremotewrite, debug]
         logs:
           receivers: [otlp]
           processors: [memory_limiter, batch]
-          exporters: [logging]
+          exporters: [debug]
 {{- end }}
