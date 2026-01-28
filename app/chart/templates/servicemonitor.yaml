@@ -3,15 +3,12 @@ kind: ServiceMonitor
 metadata:
   name: backend-monitor
   labels:
-    # Ce label est indispensable : il doit matcher ce que Prometheus cherche
     release: monitoring
 spec:
   selector:
     matchLabels:
-      # Doit être IDENTIQUE aux labels de ton Service dans app/chart/templates/service.yaml
-      app.kubernetes.io/name: shop-backend
+      app.kubernetes.io/name: diiage-finals-app
       app.kubernetes.io/instance: backend-app
   endpoints:
-  - port: http
+  - port: http # Vérifie bien que ton service backend nomme son port "http"
     path: /metrics
-    interval: 15s
