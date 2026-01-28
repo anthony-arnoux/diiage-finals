@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "diiage-finals-app.fullname" . }}-backend
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "diiage-finals-app.labels" . | nindent 4 }}
 spec:
@@ -16,6 +17,7 @@ spec:
         {{- include "diiage-finals-app.labels" . | nindent 8 }}
     spec:
       serviceAccountName: backend-sa
+      automountServiceAccountToken: true
       containers:
         - name: backend
           image: "{{ .Values.image.backend.repository }}:{{ .Values.image.backend.tag }}"
@@ -29,6 +31,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
             - name: APP_NAME
               value: {{ .Values.backend.config.appName | quote }}
             - name: LOG_LEVEL
