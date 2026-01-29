@@ -15,11 +15,11 @@ spec:
     path: traffic-gen-app/chart
     helm:
       releaseName: traffic-gen
-      parameters:
-        - name: env.BACKEND_URL
-          value: http://backend-diiage-finals-app-backend:80
-        - name: env.INTERVAL
-          value: 5s
+#      parameters:
+#        - name: env.BACKEND_URL
+#          value: http://backend-diiage-finals-app-backend:80
+#        - name: env.INTERVAL
+#          value: 5s
   destination:
     server: https://kubernetes.default.svc
     namespace: diiage
